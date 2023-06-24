@@ -13,6 +13,12 @@ import matplotlib.pyplot as plt
 import ipywidgets as widgets
 from IPython.display import display, clear_output
 import streamlit as st
+import plotly.graph_objects as go
+import pandas as pd
+import plotly.express as px
+import plotly.graph_objects as go
+import pandas as pd
+import re
 
 netflix_data = pd.read_csv('n_movies.csv')
 netflix_titles = pd.read_csv('netflix_titles.csv')
@@ -20,8 +26,7 @@ merged_df = pd.merge(netflix_data, netflix_titles, on='title', how='inner')
 df = pd.merge(netflix_data,netflix_titles[['title','director','country','date_added','type']],on='title', how='left')
 df = df.drop('certificate', axis=1)
 
-import plotly.graph_objects as go
-import pandas as pd
+# ------------------------------------------------------------------------------------------------------------
 
 # Bar chart
 genre_counts = df['genre'].str.split(', ', expand=True).stack().value_counts().reset_index()
@@ -48,374 +53,80 @@ genre_chart.update_layout(title="Genre Distribution",
                           yaxis=dict(title="Genre"),
                           bargap=0.2)
 
-genre_chart.show()
+#genre_chart.show()
 
-# Save the plot as an HTML file
-pyo.plot(genre_chart, filename='genre_chart.html', auto_open=False)
+# ------------------------------------------------------------------------------------------------------------
 
-genre_counts = df['genre'].str.split(', ').explode().value_counts().reset_index()
-
-# Create a dropdown select box for genres
-genre_dropdown = widgets.Dropdown(
-    options=genre_counts['index'],
-    value=genre_counts['index'][0],
-    description='Genre:'
-)
-
-# Create an output widget for the heatmap
-heatmap_output = widgets.Output()
-
-def plot_heatmap(genre):
-    with heatmap_output:
-        # Clear the previous heatmap
-        clear_output(wait=True)
-
+def heatmap(df):
+    # Generate the graph
+    genre_counts = df['genre'].str.split(', ').explode().value_counts().reset_index()
+    
+    # Create a dropdown select box for genres
+    genre_dropdown = st.selectbox(
+        'Select Genre',
+        genre_counts['index'],
+        index=0,
+        key='genre-dropdown'
+    )
+    
+    # Define the container for the graph
+    heatmap_output = st.empty()
+    
+    # Define the callback function to update the graph
+    @st.cache
+    def update_heatmap(genre):
+        # Filter the data based on the selected genre
         netflix_date_genre = df[df['genre'].str.contains(genre, na=False)][['date_added']].dropna()
         netflix_date_genre['year'] = netflix_date_genre['date_added'].apply(lambda x: x.split(', ')[-1])
         netflix_date_genre['month'] = netflix_date_genre['date_added'].apply(lambda x: x.lstrip().split(' ')[0])
-
+    
         month_order = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'][::-1]
         df_genre = netflix_date_genre.groupby('year')['month'].value_counts().unstack().fillna(0)[month_order].T
-
-        plt.figure(figsize=(10, 7), dpi=200)
-        plt.pcolor(df_genre, cmap='Reds', edgecolors='white', linewidths=2)
-        plt.xticks(np.arange(0.5, len(df_genre.columns), 1), df_genre.columns, fontsize=7, fontfamily='serif')
-        plt.yticks(np.arange(0.5, len(df_genre.index), 1), df_genre.index, fontsize=7, fontfamily='serif')
-        plt.title(f'Netflix Contents Update for Genre: {genre}', fontsize=12, fontweight='bold', position=(0.20, 1.0 + 0.02))
-        cbar = plt.colorbar()
-        cbar.ax.tick_params(labelsize=8)
-        cbar.ax.minorticks_on()
-        plt.show()
-
-# Define an event handler for genre dropdown change
-def on_genre_dropdown_change(change):
-    genre = change.new
-    plot_heatmap(genre)
-
-# Register the event handler
-genre_dropdown.observe(on_genre_dropdown_change, names='value')
-
-# Display the dropdown select box
-display(genre_dropdown)
-
-# Display the heatmap output
-display(heatmap_output)
-
-# Plot the initial heatmap
-plot_heatmap(genre_dropdown.value)
-
-
-# Save the plot as an HTML file
-pyo.plot(heatmap_output, filename='heatmap.html', auto_open=False)
-
-import plotly.graph_objects as go
-import pandas as pd
-import numpy as np
-from IPython.display import display
-from ipywidgets import widgets
-from IPython.display import clear_output
-
-# Calculate genre counts
-genre_counts = df['genre'].str.split(', ').explode().value_counts().reset_index()
-
-# Create a dropdown select box for genres
-genre_dropdown = widgets.Dropdown(
-    options=genre_counts['index'],
-    value=genre_counts['index'][0],
-    description='Genre:'
-)
-
-# Create an output widget for the heatmap
-heatmap_output = widgets.Output()
-
-def plot_heatmap(genre):
-    with heatmap_output:
-        # Clear the previous heatmap
-        clear_output(wait=True)
-
-        netflix_date_genre = df[df['genre'].str.contains(genre, na=False)][['date_added']].dropna()
-        netflix_date_genre['year'] = netflix_date_genre['date_added'].apply(lambda x: x.split(', ')[-1])
-        netflix_date_genre['month'] = netflix_date_genre['date_added'].apply(lambda x: x.lstrip().split(' ')[0])
-
-        month_order = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'][::-1]
-        df_genre = netflix_date_genre.groupby('year')['month'].value_counts().unstack().fillna(0)[month_order].T
-
-        # Create the heatmap figure using plotly
-        fig = go.Figure(data=go.Heatmap(
-            z=df_genre.values,
-            x=df_genre.columns,
-            y=df_genre.index,
-            colorscale='Reds',
-            showscale=True
-        ))
-
-        fig.update_layout(
-            title={
-                'text': f'Netflix Contents Update for Genre: {genre}',
-                'font': {'size': 12, 'bold': True}
-            },
-            xaxis=dict(tickfont=dict(size=7, family='serif')),
-            yaxis=dict(tickfont=dict(size=7, family='serif')),
-            width=800,
-            height=600,
-            margin=dict(l=20, r=20, t=40, b=20),
+    
+        # Generate the updated graph using Plotly Express
+        heatmap_fig = px.imshow(df_genre.values,
+                        labels=dict(x="Year", y="Month", color="Count"),
+                        x=df_genre.columns,
+                        y=df_genre.index,
+                        color_continuous_scale='Reds')
+    
+        heatmap_fig.update_layout(
+            title=f'Netflix Contents Update for Genre: {genre}',
+            font_family='Ariel',
+            height=500,
+            width=800
         )
-
-        fig.show()
-
-# Define an event handler for genre dropdown change
-def on_genre_dropdown_change(change):
-    genre = change.new
-    plot_heatmap(genre)
-
-# Register the event handler
-genre_dropdown.observe(on_genre_dropdown_change, names='value')
-
-# Display the dropdown select box
-display(genre_dropdown)
-
-# Display the heatmap output
-display(heatmap_output)
-
-# Plot the initial heatmap
-plot_heatmap(genre_dropdown.value)
+    
+        return heatmap_fig
+    
+    # Call the callback function and update the graph
+    heatmap_fig = update_heatmap(genre_dropdown)
+    
+    # Display the graph
+    heatmap_output.plotly_chart(heatmap_fig)
 
 
-# Save the plot as an HTML file
-# pyo.plot(heatmap_output, filename='heatmap.html', auto_open=False)
 
-import pandas as pd
-import plotly.express as px
-import dash
-import dash_core_components as dcc
-import dash_html_components as html
-from dash.dependencies import Input, Output
-
-
-# Generate the graph
-genre_counts = df['genre'].str.split(', ').explode().value_counts().reset_index()
-
-# Create a dropdown select box for genres
-genre_dropdown = dcc.Dropdown(
-    options=[{'label': genre, 'value': genre} for genre in genre_counts['index']],
-    value=genre_counts['index'][0],
-    id='genre-dropdown'
-)
-
-# Define the container for the graph
-heatmap_output = html.Div(id='heatmap-output')
-
-# Define the Dash app layout
-app = dash.Dash(__name__)
-app.layout = html.Div([
-    genre_dropdown,
-    heatmap_output
-])
-
-# Define the callback function to update the graph
-@app.callback(
-    Output('heatmap-output', 'children'),
-    [Input('genre-dropdown', 'value')]
-)
-def update_heatmap(genre):
-    # Filter the data based on the selected genre
-    netflix_date_genre = df[df['genre'].str.contains(genre, na=False)][['date_added']].dropna()
-    netflix_date_genre['year'] = netflix_date_genre['date_added'].apply(lambda x: x.split(', ')[-1])
-    netflix_date_genre['month'] = netflix_date_genre['date_added'].apply(lambda x: x.lstrip().split(' ')[0])
-
-    month_order = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'][::-1]
-    df_genre = netflix_date_genre.groupby('year')['month'].value_counts().unstack().fillna(0)[month_order].T
-
-    # Generate the updated graph using Plotly Express
-    heatmap_fig = px.imshow(df_genre.values,
-                    labels=dict(x="Year", y="Month", color="Count"),
-                    x=df_genre.columns,
-                    y=df_genre.index,
-                    color_continuous_scale='Reds')
-
-    heatmap_fig.update_layout(
-        title=f'Netflix Contents Update for Genre: {genre}',
-        font_family='Ariel',
-        height=500,
-        width=800
-    )
-
-    return dcc.Graph(figure=heatmap_fig)
-
-
-if __name__ == '__main__':
-    app.run_server()
-
-    html_content = app.index_string
-
-    # Save the HTML content to a file
-    with open('graph.html', 'w') as file:
-        file.write(html_content)
-
-
-# Save the plot as an HTML file
-#pyo.plot(app.index_string, filename='heatmap.html', auto_open=False)
-
-import pandas as pd
-import plotly.express as px
-import dash
-import dash_core_components as dcc
-import dash_html_components as html
-from dash.dependencies import Input, Output
-
-
-# Generate the graph
-genre_counts = df['genre'].str.split(', ').explode().value_counts().reset_index()
-
-# Create a dropdown select box for genres
-genre_dropdown = dcc.Dropdown(
-    options=[{'label': genre, 'value': genre} for genre in genre_counts['index']],
-    value=genre_counts['index'][0],
-    id='genre-dropdown'
-)
-
-# Define the container for the graph
-heatmap_output = html.Div(id='heatmap-output')
-
-# Define the Dash app layout
-app = dash.Dash(__name__)
-app.layout = html.Div([
-    genre_dropdown,
-    heatmap_output
-])
-
-# Define the callback function to update the graph
-@app.callback(
-    Output('heatmap-output', 'children'),
-    [Input('genre-dropdown', 'value')]
-)
-def update_heatmap(genre):
-    # Filter the data based on the selected genre
-    netflix_date_genre = df[df['genre'].str.contains(genre, na=False)][['date_added']].dropna()
-    netflix_date_genre['year'] = netflix_date_genre['date_added'].apply(lambda x: x.split(', ')[-1])
-    netflix_date_genre['month'] = netflix_date_genre['date_added'].apply(lambda x: x.lstrip().split(' ')[0])
-
-    month_order = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'][::-1]
-    df_genre = netflix_date_genre.groupby('year')['month'].value_counts().unstack().fillna(0)[month_order].T
-
-    # Generate the updated graph using Plotly Express
-    heatmap_fig = px.imshow(df_genre.values,
-                    labels=dict(x="Year", y="Month", color="Count"),
-                    x=df_genre.columns,
-                    y=df_genre.index,
-                    color_continuous_scale='Reds')
-
-    heatmap_fig.update_layout(
-        title=f'Netflix Contents Update for Genre: {genre}',
-        font_family='Ariel',
-        height=500,
-        width=800
-    )
-
-    return dcc.Graph(figure=heatmap_fig)
-
-
-if __name__ == '__main__':
-    app.run_server()
-
-# Save the output as an HTML file
-heatmap_output = update_heatmap(genre_dropdown.value)
-heatmap_output.write_html('heatmap.html')
-
-import pandas as pd
-import plotly.express as px
-import dash
-import dash_core_components as dcc
-import dash_html_components as html
-from dash.dependencies import Input, Output
-
-
-# Generate the graph
-genre_counts = df['genre'].str.split(', ').explode().value_counts().reset_index()
-
-# Create a dropdown select box for genres
-genre_dropdown = dcc.Dropdown(
-    options=[{'label': genre, 'value': genre} for genre in genre_counts['index']],
-    value=genre_counts['index'][0],
-    id='genre-dropdown'
-)
-
-# Define the container for the graph
-heatmap_output = html.Div(id='heatmap-output')
-
-# Define the Dash app layout
-app = dash.Dash(__name__)
-app.layout = html.Div([
-    genre_dropdown,
-    heatmap_output
-])
-
-# Define the callback function to update the graph
-@app.callback(
-    Output('heatmap-output', 'children'),
-    [Input('genre-dropdown', 'value')]
-)
-def update_heatmap(genre):
-    # Filter the data based on the selected genre
-    netflix_date_genre = df[df['genre'].str.contains(genre, na=False)][['date_added']].dropna()
-    netflix_date_genre['year'] = netflix_date_genre['date_added'].apply(lambda x: x.split(', ')[-1])
-    netflix_date_genre['month'] = netflix_date_genre['date_added'].apply(lambda x: x.lstrip().split(' ')[0])
-
-    month_order = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'][::-1]
-    df_genre = netflix_date_genre.groupby('year')['month'].value_counts().unstack().fillna(0)[month_order].T
-
-    # Generate the updated graph using Plotly Express
-    heatmap_fig = px.imshow(df_genre.values,
-                    labels=dict(x="Year", y="Month", color="Count"),
-                    x=df_genre.columns,
-                    y=df_genre.index,
-                    color_continuous_scale='Reds')
-
-    heatmap_fig.update_layout(
-        title=f'Netflix Contents Update for Genre: {genre}',
-        font_family='Ariel',
-        height=500,
-        width=800
-    )
-
-    return dcc.Graph(figure=heatmap_fig)
-
-
-if __name__ == '__main__':
-    app.run_server(debug=False)
-
-# Generate the HTML content
-html_content = app.to_html()
-
-# Save the Dash app as an HTML file
-with open('heatmap.html', 'w') as file:
-    file.write(html_content)
-
-import plotly.express as px
+# ---------------------------------------------------------------------------------------------------------------------
 
 # Calculate average rating/popularity score per country
 avg_rating = df.groupby('country')['rating'].mean().reset_index()
 
 # Create the choropleth map
 choropleth_map = px.choropleth(avg_rating, locations='country', locationmode='country names',
-                    color='rating', color_continuous_scale=['#F1DDCF', '#C81914'],
-                    hover_name='country', hover_data=['rating'],
-                    title='Average Rating/Popularity per Country',
-                    projection='natural earth')
+                               color='rating', color_continuous_scale=['#F1DDCF', '#C81914'],
+                               hover_name='country', hover_data=['rating'],
+                               title='Average Rating/Popularity per Country',
+                               projection='natural earth')
 
 # Customize marker and layout
 choropleth_map.update_traces(marker=dict(line=dict(color='rgb(200,200,200)', width=1)))
 choropleth_map.update_geos(showframe=False, showcoastlines=False)
 
-# Display the interactive choropleth map
-choropleth_map.show()
+# Display the choropleth map using Streamlit
+st.plotly_chart(choropleth_map)
 
-# Save the plot as an HTML file
-pyo.plot(choropleth_map, filename='choropleth_map.html', auto_open=False)
-
-import plotly.graph_objects as go
-import pandas as pd
-import re
+# -------------------------------------------------------------------------------------------------------------------
 
 # Drop 'NA' values from the 'type' column
 df = df.dropna(subset=['type'])
@@ -490,56 +201,52 @@ line_chart.add_shape(
     line=dict(color="#FF8A65")
 )
 
-line_chart.show()
+#line_chart.show()
 
+# -------------------------------------------------------------------------------------------------------------------------
 
-# Save the plot as an HTML file
-pyo.plot(line_chart, filename='line_chart.html', auto_open=False)
-
-import streamlit as st
-import plotly.express as px
 
 # Set the title of the dashboard
 st.title("Netflix")
+heatmap()
+# # Load and display the photo representing the title
+# title_photo = "content/netflix_logo.jpg"
+# st.image(title_photo, use_column_width=True)
 
-# Load and display the photo representing the title
-title_photo = "content/netflix_logo.jpg"
-st.image(title_photo, use_column_width=True)
+# # Create a layout with two columns for the first row
+# col1, col2 = st.columns(2)
 
-# Create a layout with two columns for the first row
-col1, col2 = st.beta_columns(2)
+# # Load and display the data for the first two graphs
+# data_graph1 = genre_chart  # Load your data for Graph 1
+# data_graph2 = line_chart  # Load your data for Graph 2
 
-# Load and display the data for the first two graphs
-data_graph1 = genre_chart  # Load your data for Graph 1
-data_graph2 = line_chart  # Load your data for Graph 2
+# # Create and display the first graph in the first column
+# with col1:
+#     st.markdown("## Graph 1: First Graph")
+#     fig1 = px.bar(data_graph1)
+#     st.plotly_chart(fig1)
 
-# Create and display the first graph in the first column
-with col1:
-    st.markdown("## Graph 1: First Graph")
-    fig1 = px.bar(data_graph1)
-    st.plotly_chart(fig1)
+# # Create and display the second graph in the second column
+# with col2:
+#     st.markdown("## Graph 2: Second Graph")
+#     fig2 = px.line(data_graph2)
+#     st.plotly_chart(fig2)
 
-# Create and display the second graph in the second column
-with col2:
-    st.markdown("## Graph 2: Second Graph")
-    fig2 = px.line(data_graph2)
-    st.plotly_chart(fig2)
+# # Create a layout with two columns for the second row
+# col3, col4 = st.columns(2)
 
-# Create a layout with two columns for the second row
-col3, col4 = st.beta_columns(2)
+# # Load and display the data for the second two graphs
+# data_graph3 = choropleth_map  # Load your data for Graph 3
+# data_graph4 = choropleth_map  # Load your data for Graph 4
 
-# Load and display the data for the second two graphs
-data_graph3 = choropleth_map  # Load your data for Graph 3
-data_graph4 = choropleth_map  # Load your data for Graph 4
+# # Create and display the third graph in the third column
+# with col3:
+#     st.markdown("## Graph 3: Third Graph")
+#     fig3 = px.density_heatmap(data_graph3)
+#     st.plotly_chart(fig3)
 
-# Create and display the third graph in the third column
-with col3:
-    st.markdown("## Graph 3: Third Graph")
-    fig3 = px.density_heatmap(data_graph3)
-    st.plotly_chart(fig3)
-
-# Create and display the fourth graph in the fourth column
-with col4:
-    st.markdown("## Graph 4: Fourth Graph")
-    fig4 = px.choropleth_mapbox(data_graph4)
-    st.plotly_chart(fig4)
+# # Create and display the fourth graph in the fourth column
+# with col4:
+#     st.markdown("## Graph 4: Fourth Graph")
+#     fig4 = px.choropleth_mapbox(data_graph4)
+#     st.plotly_chart(fig4)
