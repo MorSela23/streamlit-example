@@ -64,7 +64,7 @@ def heatmap(df):
     # Create a dropdown select box for genres
     genre_dropdown = st.selectbox(
         'Select Genre',
-        genre_counts['index'],
+        genre_counts,
         index=0,
         key='genre-dropdown'
     )
