@@ -219,24 +219,26 @@ with col2:
     st.image(title_photo, use_column_width=False, width=400)
     
     
-col4, col5, col6 = st.columns(3)
+col4, col5, col6, col7 = st.columns(4)
 with col5:
-    st.subheader("Analyzing the most Netflix's popular content dashboard")
+    st.subheader("Analyzing the most Netflix's")
+with col6:
+    st.subheader(" popular content dashboard")
     
     
-col7, col8 = st.columns(2, gap="large")
-with col7:
+col8, col9 = st.columns(2, gap="large")
+with col8:
     st.header("Genre Distribution")
     bar_chart(df)
-with col8:
+with col9:
     st.header("Average Rating per Country")
     choropleth_map(df)
 
-col9, col10 = st.columns(2, gap="large")
-with col9:
+col10, col11 = st.columns(2, gap="large")
+with col10:
     st.header("Netflix Contents Update per Genre")
     heatmap(df)
-with col10:
+with col11:
     st.header("Average Rating Over Years")
     line_chart(df)
 
