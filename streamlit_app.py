@@ -27,33 +27,35 @@ df = pd.merge(netflix_data,netflix_titles[['title','director','country','date_ad
 df = df.drop('certificate', axis=1)
 
 # ------------------------------------------------------------------------------------------------------------
-
-# Bar chart
-genre_counts = df['genre'].str.split(', ', expand=True).stack().value_counts().reset_index()
-genre_counts.columns = ['index', 'value']
-genre_counts = genre_counts.sort_values('value')
-genre_counts['index'] = pd.Categorical(genre_counts['index'], categories=genre_counts['index'])
-
-# Calculate average duration for each genre
-genre_avg_duration = df['genre'].str.split(', ', expand=True).stack().reset_index(level=0).rename(columns={0: 'genre'})
-genre_avg_duration['duration'] = df['duration'].str.split(' ').str[0]
-genre_avg_duration['duration'] = pd.to_numeric(genre_avg_duration['duration'], errors='coerce')
-genre_avg_duration = genre_avg_duration.groupby('genre')['duration'].mean().reset_index()
-
-# Merge average duration into genre_counts DataFrame
-genre_counts = pd.merge(genre_counts, genre_avg_duration, left_on='index', right_on='genre')
-genre_counts = genre_counts.drop('genre', axis=1)
-
-genre_chart = go.Figure(data=[go.Bar(x=genre_counts['value'], y=genre_counts['index'], orientation='h', marker=dict(color='#E64A19'),
-                                    text=genre_counts['duration'].round(2), textposition='auto',
-                                    hovertemplate='Duration: %{text}')])
-
-genre_chart.update_layout(title="Genre Distribution",
-                          xaxis=dict(title="Count"),
-                          yaxis=dict(title="Genre"),
-                          bargap=0.2)
-
-#genre_chart.show()
+def bar_chart(df):
+    genre_counts = df['genre'].str.split(', ', expand=True).stack().value_counts().reset_index()
+    genre_counts.columns = ['index', 'value']
+    genre_counts = genre_counts.sort_values('value')
+    genre_counts['index'] = pd.Categorical(genre_counts['index'], categories=genre_counts['index'])
+    
+    # Calculate average duration for each genre
+    genre_avg_duration = df['genre'].str.split(', ', expand=True).stack().reset_index(level=0).rename(columns={0: 'genre'})
+    genre_avg_duration['duration'] = df['duration'].str.split(' ').str[0]
+    genre_avg_duration['duration'] = pd.to_numeric(genre_avg_duration['duration'], errors='coerce')
+    genre_avg_duration = genre_avg_duration.groupby('genre')['duration'].mean().reset_index()
+    
+    # Merge average duration into genre_counts DataFrame
+    genre_counts = pd.merge(genre_counts, genre_avg_duration, left_on='index', right_on='genre')
+    genre_counts = genre_counts.drop('genre', axis=1)
+    
+    genre_chart = go.Figure(data=[go.Bar(x=genre_counts['value'], y=genre_counts['index'], orientation='h', marker=dict(color='#E64A19'),
+                                        text=genre_counts['duration'].round(2), textposition='auto',
+                                        hovertemplate='Duration: %{text}')])
+    
+    genre_chart.update_layout(title="Genre Distribution",
+                              xaxis=dict(title="Count"),
+                              yaxis=dict(title="Genre"),
+                              bargap=0.2)
+    
+    
+    # Streamlit app
+    st.title("Genre Distribution Bar Chart")
+    st.plotly_chart(genre_chart)
 
 # ------------------------------------------------------------------------------------------------------------
 
@@ -210,6 +212,7 @@ line_chart.add_shape(
 st.title("Netflix")
 heatmap(df)
 choropleth_map(df)
+bar_chart(df)
 # # Load and display the photo representing the title
 # title_photo = "content/netflix_logo.jpg"
 # st.image(title_photo, use_column_width=True)
