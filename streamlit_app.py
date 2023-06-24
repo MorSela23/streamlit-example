@@ -108,23 +108,23 @@ def heatmap(df):
 
 
 # ---------------------------------------------------------------------------------------------------------------------
-
-# Calculate average rating/popularity score per country
-avg_rating = df.groupby('country')['rating'].mean().reset_index()
-
-# Create the choropleth map
-choropleth_map = px.choropleth(avg_rating, locations='country', locationmode='country names',
-                               color='rating', color_continuous_scale=['#F1DDCF', '#C81914'],
-                               hover_name='country', hover_data=['rating'],
-                               title='Average Rating/Popularity per Country',
-                               projection='natural earth')
-
-# Customize marker and layout
-choropleth_map.update_traces(marker=dict(line=dict(color='rgb(200,200,200)', width=1)))
-choropleth_map.update_geos(showframe=False, showcoastlines=False)
-
-# Display the choropleth map using Streamlit
-st.plotly_chart(choropleth_map)
+def choropleth_map(df):
+    # Calculate average rating/popularity score per country
+    avg_rating = df.groupby('country')['rating'].mean().reset_index()
+    
+    # Create the choropleth map
+    choropleth_map = px.choropleth(avg_rating, locations='country', locationmode='country names',
+                                   color='rating', color_continuous_scale=['#F1DDCF', '#C81914'],
+                                   hover_name='country', hover_data=['rating'],
+                                   title='Average Rating/Popularity per Country',
+                                   projection='natural earth')
+    
+    # Customize marker and layout
+    choropleth_map.update_traces(marker=dict(line=dict(color='rgb(200,200,200)', width=1)))
+    choropleth_map.update_geos(showframe=False, showcoastlines=False)
+    
+    # Display the choropleth map using Streamlit
+    st.plotly_chart(choropleth_map)
 
 # -------------------------------------------------------------------------------------------------------------------
 
@@ -209,6 +209,7 @@ line_chart.add_shape(
 # Set the title of the dashboard
 st.title("Netflix")
 heatmap(df)
+choropleth_map(df)
 # # Load and display the photo representing the title
 # title_photo = "content/netflix_logo.jpg"
 # st.image(title_photo, use_column_width=True)
