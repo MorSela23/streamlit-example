@@ -20,6 +20,7 @@ import plotly.graph_objects as go
 import pandas as pd
 import re
 
+
 netflix_data = pd.read_csv('n_movies.csv')
 netflix_titles = pd.read_csv('netflix_titles.csv')
 merged_df = pd.merge(netflix_data, netflix_titles, on='title', how='inner')
