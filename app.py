@@ -12,6 +12,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import ipywidgets as widgets
 from IPython.display import display, clear_output
+import streamlit as st
 
 netflix_data = pd.read_csv('/content/n_movies.csv')
 netflix_titles = pd.read_csv('/content/netflix_titles.csv')
