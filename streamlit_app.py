@@ -20,6 +20,7 @@ import plotly.graph_objects as go
 import pandas as pd
 import re
 
+# ---------------------------------------------------------------------------------------------------
 
 netflix_data = pd.read_csv('n_movies.csv')
 netflix_titles = pd.read_csv('netflix_titles.csv')
@@ -108,8 +109,6 @@ def heatmap(df):
     # Display the graph
     heatmap_output.plotly_chart(heatmap_fig)
 
-
-
 # ---------------------------------------------------------------------------------------------------------------------
 def choropleth_map(df):
     # Calculate average rating/popularity score per country
@@ -127,7 +126,6 @@ def choropleth_map(df):
     
     # Display the choropleth map using Streamlit
     st.plotly_chart(choropleth_map)
-
 # -------------------------------------------------------------------------------------------------------------------
 
 def line_chart(df):
@@ -233,46 +231,3 @@ with col4:
     st.header("Average Rating Over Years Line Chart")
     line_chart(df)
 
-
-
-# # Load and display the photo representing the title
-# title_photo = "content/netflix_logo.jpg"
-# st.image(title_photo, use_column_width=True)
-
-# # Create a layout with two columns for the first row
-# col1, col2 = st.columns(2)
-
-# # Load and display the data for the first two graphs
-# data_graph1 = genre_chart  # Load your data for Graph 1
-# data_graph2 = line_chart  # Load your data for Graph 2
-
-# # Create and display the first graph in the first column
-# with col1:
-#     st.markdown("## Graph 1: First Graph")
-#     fig1 = px.bar(data_graph1)
-#     st.plotly_chart(fig1)
-
-# # Create and display the second graph in the second column
-# with col2:
-#     st.markdown("## Graph 2: Second Graph")
-#     fig2 = px.line(data_graph2)
-#     st.plotly_chart(fig2)
-
-# # Create a layout with two columns for the second row
-# col3, col4 = st.columns(2)
-
-# # Load and display the data for the second two graphs
-# data_graph3 = choropleth_map  # Load your data for Graph 3
-# data_graph4 = choropleth_map  # Load your data for Graph 4
-
-# # Create and display the third graph in the third column
-# with col3:
-#     st.markdown("## Graph 3: Third Graph")
-#     fig3 = px.density_heatmap(data_graph3)
-#     st.plotly_chart(fig3)
-
-# # Create and display the fourth graph in the fourth column
-# with col4:
-#     st.markdown("## Graph 4: Fourth Graph")
-#     fig4 = px.choropleth_mapbox(data_graph4)
-#     st.plotly_chart(fig4)
