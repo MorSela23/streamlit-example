@@ -214,7 +214,8 @@ def line_chart(df):
 st.set_page_config(layout="wide")
 # Set the title of the dashboard
 st.title("Netflix")
-# st.image("netflix_logo.jpg", width=800, height=600)
+title_photo = "netflix_logo.jpg"
+# st.image(title_photo, width=800, height=600, use_column_width=True)
 
 col1, col2 = st.columns(2, gap="large")
 with col1:
@@ -226,7 +227,7 @@ with col2:
 
 col3, col4 = st.columns(2, gap="large")
 with col3:
-    st.header("    ")
+    st.header("Netflix Contents Update per Genre")
     heatmap(df)
 with col4:
     st.header("Average Rating Over Years Line Chart")
