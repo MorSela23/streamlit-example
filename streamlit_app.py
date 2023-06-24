@@ -213,7 +213,7 @@ st.set_page_config(layout="wide")
 # Set the title of the dashboard
 # st.title("Netflix")
 title_photo = "netflix_logo.jpg"
-st.image(title_photo, use_column_width=False)
+st.image(title_photo, use_column_width=False, width=150)
 
 col1, col2 = st.columns(2, gap="large")
 with col1:
