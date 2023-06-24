@@ -14,8 +14,8 @@ import ipywidgets as widgets
 from IPython.display import display, clear_output
 import streamlit as st
 
-netflix_data = pd.read_csv('/content/n_movies.csv')
-netflix_titles = pd.read_csv('/content/netflix_titles.csv')
+netflix_data = pd.read_csv('n_movies.csv')
+netflix_titles = pd.read_csv('netflix_titles.csv')
 merged_df = pd.merge(netflix_data, netflix_titles, on='title', how='inner')
 df = pd.merge(netflix_data,netflix_titles[['title','director','country','date_added','type']],on='title', how='left')
 df = df.drop('certificate', axis=1)
