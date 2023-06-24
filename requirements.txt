@@ -5,4 +5,7 @@ numpy
 matplotlib
 ipywidgets 
 IPython
-
+plotly
+dash
+dash_core_components
+dash_html_components
