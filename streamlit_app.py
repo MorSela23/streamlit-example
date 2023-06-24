@@ -212,22 +212,25 @@ def line_chart(df):
 st.set_page_config(layout="wide")
 # Set the title of the dashboard
 # st.title("Netflix")
-title_photo = "netflix_logo.jpg"
-st.image(title_photo, use_column_width=False, width=150)
 
-col1, col2 = st.columns(2, gap="large")
-with col1:
+col1, col2, col3 = st.columns(3)
+with col2:
+    title_photo = "netflix_logo.jpg"
+    st.image(title_photo, use_column_width=False, width=300)
+
+col4, col5 = st.columns(2, gap="large")
+with col4:
     st.header("Genre Distribution Bar Chart")
     bar_chart(df)
-with col2:
+with col5:
     st.header("Average Rating per Country")
     choropleth_map(df)
 
-col3, col4 = st.columns(2, gap="large")
-with col3:
+col6, col7 = st.columns(2, gap="large")
+with col6:
     st.header("Netflix Contents Update per Genre")
     heatmap(df)
-with col4:
+with col7:
     st.header("Average Rating Over Years Line Chart")
     line_chart(df)
 
