@@ -235,6 +235,7 @@ with col4:
     line_chart(df)
 
 
+
 # # Load and display the photo representing the title
 # title_photo = "content/netflix_logo.jpg"
 # st.image(title_photo, use_column_width=True)
