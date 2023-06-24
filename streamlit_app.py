@@ -219,11 +219,11 @@ with col2:
     st.image(title_photo, use_column_width=False, width=400)
     
     
-col4, col5, col6, col7 = st.columns(4)
+col4, col5, col6, col7 = st.columns(4, gap = "None")
 with col5:
-    st.subheader("Analyzing the most Netflix's")
+    st.subheader("Analyzing the most popular")
 with col6:
-    st.subheader(" popular content dashboard")
+    st.subheader(" Netflix's content dashboard")
     
     
 col8, col9 = st.columns(2, gap="large")
