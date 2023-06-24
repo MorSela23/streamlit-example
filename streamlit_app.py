@@ -130,80 +130,85 @@ def choropleth_map(df):
 
 # -------------------------------------------------------------------------------------------------------------------
 
-# Drop 'NA' values from the 'type' column
-df = df.dropna(subset=['type'])
-
-# Remove null values from the 'rating' column
-df = df[~df['rating'].isnull()]
-
-# Convert 'year' column to string
-df['year'] = df['year'].astype(str)
-
-# Filter out values from the 'year' column that do not fit the 4-digit string representation
-df['year'] = df['year'].str.extract(r'(\d{4})').astype(int)
-
-# Convert 'year' column to numeric
-df['year'] = pd.to_numeric(df['year'])
-
-
-# Group by year and type, and calculate the average rating
-grouped_df = df.groupby(['year', 'type'])['rating'].mean().reset_index()
-
-# Create the line chart
-line_chart = go.Figure()
-
-line_chart.add_trace(go.Scatter(
-    x=grouped_df.loc[grouped_df['type'] == 'TV Show', 'year'],
-    y=grouped_df.loc[grouped_df['type'] == 'TV Show', 'rating'],
-    mode='lines+markers',
-    name='TV Show',
-    marker=dict(color="#DD2C00"),
-    line=dict(color="#DD2C00"),
-    hovertemplate="<b>Year:</b> %{x}<br><b>Average Rating:</b> %{y}<br>",
-    showlegend=True
-))
-
-line_chart.add_trace(go.Scatter(
-    x=grouped_df.loc[grouped_df['type'] == 'Movie', 'year'],
-    y=grouped_df.loc[grouped_df['type'] == 'Movie', 'rating'],
-    mode='lines+markers',
-    name='Movie',
-    marker=dict(color="#EDB781"),
-    line=dict(color="#EDB781"),
-    hovertemplate="<b>Year:</b> %{x}<br><b>Average Rating:</b> %{y}<br>",
-    showlegend=True
-))
-
-line_chart.update_layout(
-    title="Average Rating Over Years",
-    xaxis=dict(title="Year", range=[df['year'].min(), df['year'].max()], rangeslider=dict(visible=True)),
-    yaxis=dict(title="Average Rating"),
-    hovermode="closest",
-    legend=dict(
-        traceorder='grouped',
-        itemsizing="constant"
+def line_chart(df):
+    # Drop 'NA' values from the 'type' column
+    df = df.dropna(subset=['type'])
+    
+    # Remove null values from the 'rating' column
+    df = df[~df['rating'].isnull()]
+    
+    # Convert 'year' column to string
+    df['year'] = df['year'].astype(str)
+    
+    # Filter out values from the 'year' column that do not fit the 4-digit string representation
+    df['year'] = df['year'].str.extract(r'(\d{4})').astype(int)
+    
+    # Convert 'year' column to numeric
+    df['year'] = pd.to_numeric(df['year'])
+    
+    
+    # Group by year and type, and calculate the average rating
+    grouped_df = df.groupby(['year', 'type'])['rating'].mean().reset_index()
+    
+    # Create the line chart
+    line_chart = go.Figure()
+    
+    line_chart.add_trace(go.Scatter(
+        x=grouped_df.loc[grouped_df['type'] == 'TV Show', 'year'],
+        y=grouped_df.loc[grouped_df['type'] == 'TV Show', 'rating'],
+        mode='lines+markers',
+        name='TV Show',
+        marker=dict(color="#DD2C00"),
+        line=dict(color="#DD2C00"),
+        hovertemplate="<b>Year:</b> %{x}<br><b>Average Rating:</b> %{y}<br>",
+        showlegend=True
+    ))
+    
+    line_chart.add_trace(go.Scatter(
+        x=grouped_df.loc[grouped_df['type'] == 'Movie', 'year'],
+        y=grouped_df.loc[grouped_df['type'] == 'Movie', 'rating'],
+        mode='lines+markers',
+        name='Movie',
+        marker=dict(color="#EDB781"),
+        line=dict(color="#EDB781"),
+        hovertemplate="<b>Year:</b> %{x}<br><b>Average Rating:</b> %{y}<br>",
+        showlegend=True
+    ))
+    
+    line_chart.update_layout(
+        title="Average Rating Over Years",
+        xaxis=dict(title="Year", range=[df['year'].min(), df['year'].max()], rangeslider=dict(visible=True)),
+        yaxis=dict(title="Average Rating"),
+        hovermode="closest",
+        legend=dict(
+            traceorder='grouped',
+            itemsizing="constant"
+        )
     )
-)
+    
+    line_chart.add_shape(
+        type="line",
+        x0=grouped_df.loc[grouped_df['type'] == 'TV Show', 'year'].tolist(),
+        y0=grouped_df.loc[grouped_df['type'] == 'TV Show', 'rating'].tolist(),
+        x1=grouped_df.loc[grouped_df['type'] == 'TV Show', 'year'].tolist()[1:],
+        y1=grouped_df.loc[grouped_df['type'] == 'TV Show', 'rating'].tolist()[1:],
+        line=dict(color="#DD2C00")
+    )
+    
+    line_chart.add_shape(
+        type="line",
+        x0=grouped_df.loc[grouped_df['type'] == 'Movie', 'year'].tolist(),
+        y0=grouped_df.loc[grouped_df['type'] == 'Movie', 'rating'].tolist(),
+        x1=grouped_df.loc[grouped_df['type'] == 'Movie', 'year'].tolist()[1:],
+        y1=grouped_df.loc[grouped_df['type'] == 'Movie', 'rating'].tolist()[1:],
+        line=dict(color="#FF8A65")
+    )
+    
+    
+    # Streamlit app
+    st.title("Average Rating Over Years Line Chart")
+    st.plotly_chart(line_chart)
 
-line_chart.add_shape(
-    type="line",
-    x0=grouped_df.loc[grouped_df['type'] == 'TV Show', 'year'].tolist(),
-    y0=grouped_df.loc[grouped_df['type'] == 'TV Show', 'rating'].tolist(),
-    x1=grouped_df.loc[grouped_df['type'] == 'TV Show', 'year'].tolist()[1:],
-    y1=grouped_df.loc[grouped_df['type'] == 'TV Show', 'rating'].tolist()[1:],
-    line=dict(color="#DD2C00")
-)
-
-line_chart.add_shape(
-    type="line",
-    x0=grouped_df.loc[grouped_df['type'] == 'Movie', 'year'].tolist(),
-    y0=grouped_df.loc[grouped_df['type'] == 'Movie', 'rating'].tolist(),
-    x1=grouped_df.loc[grouped_df['type'] == 'Movie', 'year'].tolist()[1:],
-    y1=grouped_df.loc[grouped_df['type'] == 'Movie', 'rating'].tolist()[1:],
-    line=dict(color="#FF8A65")
-)
-
-#line_chart.show()
 
 # -------------------------------------------------------------------------------------------------------------------------
 
@@ -213,6 +218,7 @@ st.title("Netflix")
 heatmap(df)
 choropleth_map(df)
 bar_chart(df)
+line_chart(df)
 # # Load and display the photo representing the title
 # title_photo = "content/netflix_logo.jpg"
 # st.image(title_photo, use_column_width=True)
