@@ -208,7 +208,7 @@ line_chart.add_shape(
 
 # Set the title of the dashboard
 st.title("Netflix")
-heatmap()
+heatmap(df)
 # # Load and display the photo representing the title
 # title_photo = "content/netflix_logo.jpg"
 # st.image(title_photo, use_column_width=True)
