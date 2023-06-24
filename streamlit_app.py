@@ -219,7 +219,7 @@ with col2:
     st.image(title_photo, use_column_width=False, width=400)
     
     
-col4, col5, col6, col7 = st.columns(4, gap = "None")
+col4, col5, col6, col7 = st.columns(4, gap = "small")
 with col5:
     st.subheader("Analyzing the most popular")
 with col6:
