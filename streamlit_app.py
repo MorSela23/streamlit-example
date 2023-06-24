@@ -215,10 +215,13 @@ def line_chart(df):
 
 # Set the title of the dashboard
 st.title("Netflix")
-heatmap(df)
-choropleth_map(df)
 bar_chart(df)
 line_chart(df)
+col1, col2 = st.columns(2)
+with col1:
+    heatmap(df)
+with col2:
+    choropleth_map(df)
 # # Load and display the photo representing the title
 # title_photo = "content/netflix_logo.jpg"
 # st.image(title_photo, use_column_width=True)
