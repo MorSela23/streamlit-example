@@ -174,7 +174,7 @@ def line_chart(df):
     ))
     
     line_chart.update_layout(
-        title="Average Rating Over Years",
+        
         xaxis=dict(title="Year", range=[df['year'].min(), df['year'].max()], rangeslider=dict(visible=True)),
         yaxis=dict(title="Average Rating"),
         hovermode="closest",
@@ -217,21 +217,26 @@ col1, col2, col3 = st.columns(3)
 with col2:
     title_photo = "netflix_logo.jpg"
     st.image(title_photo, use_column_width=False, width=400)
+    
+    
+col4, col5, col6 = st.columns(3)
+with col5:
     st.subheader("Analyzing the most popular content dashboard")
     
-col4, col5 = st.columns(2, gap="large")
-with col4:
-    st.header("Genre Distribution Bar Chart")
+    
+col7, col8 = st.columns(2, gap="large")
+with col7:
+    st.header("Genre Distribution")
     bar_chart(df)
-with col5:
+with col8:
     st.header("Average Rating per Country")
     choropleth_map(df)
 
-col6, col7 = st.columns(2, gap="large")
-with col6:
+col9, col10 = st.columns(2, gap="large")
+with col9:
     st.header("Netflix Contents Update per Genre")
     heatmap(df)
-with col7:
-    st.header("Average Rating Over Years Line Chart")
+with col10:
+    st.header("Average Rating Over Years")
     line_chart(df)
 
