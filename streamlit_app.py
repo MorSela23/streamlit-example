@@ -213,8 +213,8 @@ def line_chart(df):
 
 st.set_page_config(layout="wide")
 # Set the title of the dashboard
-# st.title("Netflix")
-st.image("netflix_logo.jpg", width=800, height=600)
+st.title("Netflix")
+# st.image("netflix_logo.jpg", width=800, height=600)
 
 col1, col2 = st.columns(2, gap="large")
 with col1:
