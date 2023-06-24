@@ -221,7 +221,7 @@ with col2:
     
 col4, col5, col6 = st.columns(3)
 with col5:
-    st.subheader("Analyzing the most popular content dashboard")
+    st.subheader("Analyzing the most Netflix's popular content dashboard")
     
     
 col7, col8 = st.columns(2, gap="large")
