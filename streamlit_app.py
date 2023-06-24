@@ -235,4 +235,4 @@ with col7:
     st.header("Average Rating Over Years")
     line_chart(df)
 
-streamlit build streamlit_app.py.py
+streamlit build streamlit_app.py
