@@ -55,7 +55,7 @@ def bar_chart(df):
     
     
     # Streamlit app
-    st.title("Genre Distribution Bar Chart")
+    # st.title("Genre Distribution Bar Chart")
     st.plotly_chart(genre_chart)
 
 # ------------------------------------------------------------------------------------------------------------
@@ -119,7 +119,6 @@ def choropleth_map(df):
     choropleth_map = px.choropleth(avg_rating, locations='country', locationmode='country names',
                                    color='rating', color_continuous_scale=['#F1DDCF', '#C81914'],
                                    hover_name='country', hover_data=['rating'],
-                                   title='Average Rating/Popularity per Country',
                                    projection='natural earth')
     
     # Customize marker and layout
@@ -207,7 +206,6 @@ def line_chart(df):
     
     
     # Streamlit app
-    st.title("Average Rating Over Years Line Chart")
     st.plotly_chart(line_chart)
 
 
@@ -216,19 +214,24 @@ def line_chart(df):
 
 # Set the title of the dashboard
 # st.title("Netflix")
-title_photo = "netflix_logo.jpg"
-st.image(title_photo, use_column_width=True)
+st.image("netflix_logo.jpg", width=800, height=600)
+
+st.set_page_config(layout="wide")
 
 col1, col2 = st.columns(2, gap="large")
 with col1:
+    st.header("Genre Distribution Bar Chart")
     bar_chart(df)
 with col2:
+    st.header("Average Rating per Country")
     choropleth_map(df)
 
 col3, col4 = st.columns(2, gap="large")
 with col3:
+    st.header("    ")
     heatmap(df)
 with col4:
+    st.header("Average Rating Over Years Line Chart")
     line_chart(df)
 
 
