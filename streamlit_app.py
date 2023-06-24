@@ -216,7 +216,8 @@ st.set_page_config(layout="wide")
 col1, col2, col3 = st.columns(3)
 with col2:
     title_photo = "netflix_logo.jpg"
-    st.image(title_photo, use_column_width=False, width=300)
+    st.image(title_photo, use_column_width=False, width=400)
+    abcdr
 
 col4, col5 = st.columns(2, gap="large")
 with col4:
